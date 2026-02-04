@@ -1,4 +1,5 @@
 import streamlit as st
+
 import matplotlib.pyplot as plt
 
 # --- 1. DATABASE COMPLETO DATI ISTAT 2025 ---
@@ -93,7 +94,7 @@ with st.expander(f"📝 ANALISI DETTAGLIATA - {mese}", expanded=True):
 
 # --- 5. GRAFICI STATICI (MATPLOTLIB) ---
 st.write(f"### 📈 Grafici {mese}")
-colors_std = ['#3498db', '#e74c3c', '#95a5a6'] # Celeste, Rosso, Grigio
+colors_std = ['#3498db', '#e74c3c', '#95a5a6']
 
 # Grafico Tassi
 fig1, ax1 = plt.subplots(figsize=(10, 4))
@@ -118,7 +119,6 @@ with tab1:
         st.pyplot(fig_c)
     with c2:
         fig_p1, ax_p1 = plt.subplots(figsize=(8, 6))
-        # Etichette esterne con i valori percentuali di incidenza
         labels_c = [f"Inc. Occ\n{d['inc_occ_c']}%", f"Inc. Ina\n{d['inc_ina_c']}%"]
         ax_p1.pie([abs(d['inc_occ_c']), abs(d['inc_ina_c'])], labels=labels_c, 
                   colors=['#3498db', '#95a5a6'], startangle=90, autopct='%1.1f%%', textprops={'fontweight':'bold'})
@@ -138,7 +138,6 @@ with tab2:
         st.pyplot(fig_t)
     with c4:
         fig_p2, ax_p2 = plt.subplots(figsize=(8, 6))
-        # Etichette esterne con i valori percentuali di incidenza
         labels_t = [f"Inc. Occ\n{d['inc_occ_t']}%", f"Inc. Ina\n{d['inc_ina_t']}%"]
         ax_p2.pie([abs(d['inc_occ_t']), abs(d['inc_ina_t'])], labels=labels_t, 
                   colors=['#3498db', '#95a5a6'], startangle=90, autopct='%1.1f%%', textprops={'fontweight':'bold'})
