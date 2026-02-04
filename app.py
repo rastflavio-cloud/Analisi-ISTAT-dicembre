@@ -15,26 +15,32 @@ database_istat = {
     "Gennaio 2025": {"occ": 24222, "dis": 1621, "ina": 12242, "t_occ": 62.8, "t_dis": 6.3, "t_ina": 32.9, "v_occ_c": 145, "v_dis_c": -9, "v_ina_c": -146, "v_occ_t": 513, "v_dis_t": -194, "v_ina_t": -158, "inc_occ_c": -1611.1, "inc_ina_c": -1622.2, "inc_occ_t": -264.4, "inc_ina_t": -81.4},
 }
 
+# --- 2. CONFIGURAZIONE PAGINA ---
 st.set_page_config(page_title="Analisi Istat 2025", layout="wide")
 st.title("📊 Analisi Mercato del Lavoro 2025")
 
 mese = st.selectbox("Seleziona il mese:", list(database_istat.keys()))
 d = database_istat[mese]
 
+# --- 3. ANALISI TESTUALE ---
 with st.expander(f"📝 ANALISI DETTAGLIATA - {mese}", expanded=True):
     def color_val(val):
         c = "red" if val < 0 else "#00ff00"
         return f"<span style='color:{c}; font-weight:bold;'>{val:+} mila</span>"
     
+    # Disoccupazione in nero grassetto
+    dis_str = f"<span style='color:black; font-weight:bold;'>{d['v_dis_c']:+} mila</span>"
+
     st.markdown(f"""
     **TASSO OCCUPAZIONE:** {d['t_occ']}% | **DISOCCUPAZIONE:** {d['t_dis']}% | **INATTIVITÀ:** {d['t_ina']}%
     
     ---
-    **VARIAZIONE MENSILE:** Occ {color_val(d['v_occ_c'])} | **Dis {d['v_dis_c'] :+ } mila** | Ina {color_val(d['v_ina_c'])}
+    **VARIAZIONE MENSILE:** Occ {color_val(d['v_occ_c'])} | **Dis {dis_str}** | Ina {color_val(d['v_ina_c'])}
     * Incidenza Occ: **{d['inc_occ_c']}%** | Incidenza Ina: **{d['inc_ina_c']}%**
     """, unsafe_allow_html=True)
 
-c_occ, c_dis, c_ina = '#3498db', '#e74c3c', '#95a5a6'
+# --- 4. GRAFICI ---
+c_occ, c_dis, c_ina = '#3498db', '#e74c3c', '#95a5a6' # Celeste, Rosso, Grigio
 
 def plot_pie(occ_v, dis_v, ina_v, occ_i, ina_i, title):
     fig, ax = plt.subplots()
@@ -46,6 +52,6 @@ def plot_pie(occ_v, dis_v, ina_v, occ_i, ina_i, title):
 
 tab1, tab2 = st.tabs(["🔴 MENSILE", "🟡 ANNUALE"])
 with tab1:
-    st.pyplot(plot_pie(d['v_occ_c'], d['v_dis_c'], d['v_ina_c'], d['inc_occ_c'], d['inc_ina_c'], "Ripartizione delle variazioni occupati e inattivi"))
+    st.pyplot(plot_pie(d['v_occ_c'], d['v_dis_c'], d['v_ina_c'], d['inc_occ_c'], d['inc_ina_c'], "ripartizione delle variazioni occupati e inattivi"))
 with tab2:
-    st.pyplot(plot_pie(d['v_occ_t'], d['v_dis_t'], d['v_ina_t'], d['inc_occ_t'], d['inc_ina_t'], "Ripartizione delle variazioni occupati e inattivi"))
+    st.pyplot(plot_pie(d['v_occ_t'], d['v_dis_t'], d['v_ina_t'], d['inc_occ_t'], d['inc_ina_t'], "ripartizione delle variazioni occupati e inattivi"))
