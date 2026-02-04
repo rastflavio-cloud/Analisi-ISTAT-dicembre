@@ -1,5 +1,4 @@
 import streamlit as st
-
 import matplotlib.pyplot as plt
 
 # --- 1. DATABASE COMPLETO DATI ISTAT 2025 ---
@@ -94,11 +93,11 @@ with st.expander(f"📝 ANALISI DETTAGLIATA - {mese}", expanded=True):
 
 # --- 5. GRAFICI STATICI (MATPLOTLIB) ---
 st.write(f"### 📈 Grafici {mese}")
-colors_std = ['#3498db', '#e74c3c', '#95a5a6']
+c_occ, c_dis, c_ina = '#3498db', '#e74c3c', '#95a5a6' # Celeste, Rosso, Grigio
 
 # Grafico Tassi
 fig1, ax1 = plt.subplots(figsize=(10, 4))
-ax1.bar(['Occ', 'Dis', 'Ina'], [d['t_occ'], d['t_dis'], d['t_ina']], color=colors_std, width=0.5)
+ax1.bar(['Occ', 'Dis', 'Ina'], [d['t_occ'], d['t_dis'], d['t_ina']], color=[c_occ, c_dis, c_ina], width=0.5)
 ax1.set_title(f"TASSI ATTUALI ({mese})", fontweight='bold')
 for i, v in enumerate([d['t_occ'], d['t_dis'], d['t_ina']]):
     ax1.text(i, v + 1, f"{v}%", ha='center', fontweight='bold')
@@ -111,7 +110,7 @@ with tab1:
     with c1:
         fig_c, ax_c = plt.subplots(figsize=(8, 6))
         v_c = [d['v_occ_c'], d['v_dis_c'], d['v_ina_c']]
-        ax_c.bar(['Occupati', 'Disoccupati', 'Inattivi'], v_c, color=colors_std)
+        ax_c.bar(['Occupati', 'Disoccupati', 'Inattivi'], v_c, color=[c_occ, c_dis, c_ina])
         ax_c.axhline(0, color='black', linewidth=1.5)
         ax_c.set_title("VARIAZIONE MENSILE (k)", fontweight='bold')
         for i, v in enumerate(v_c):
@@ -119,10 +118,11 @@ with tab1:
         st.pyplot(fig_c)
     with c2:
         fig_p1, ax_p1 = plt.subplots(figsize=(8, 6))
-        labels_c = [f"Inc. Occ\n{d['inc_occ_c']}%", f"Inc. Ina\n{d['inc_ina_c']}%"]
-        ax_p1.pie([abs(d['inc_occ_c']), abs(d['inc_ina_c'])], labels=labels_c, 
-                  colors=['#3498db', '#95a5a6'], startangle=90, autopct='%1.1f%%', textprops={'fontweight':'bold'})
-        ax_p1.set_title(f"INCIDENZA SU VAR. DISOCCUPATI ({d['v_dis_c']}k)", fontweight='bold')
+        # Logica: Confronto relativo tra le due incidenze (Occupazione vs Inattività)
+        sizes = [abs(d['inc_occ_c']), abs(d['inc_ina_c'])]
+        labels = [f"Inc. Occ\n{d['inc_occ_c']}%", f"Inc. Ina\n{d['inc_ina_c']}%"]
+        ax_p1.pie(sizes, labels=labels, colors=[c_occ, c_ina], startangle=90, autopct='%1.1f%%', textprops={'fontweight':'bold'})
+        ax_p1.set_title(f"PESO RELATIVO SU VAR. DISOCCUPATI ({d['v_dis_c']}k)", fontweight='bold')
         st.pyplot(fig_p1)
 
 with tab2:
@@ -130,7 +130,7 @@ with tab2:
     with c3:
         fig_t, ax_t = plt.subplots(figsize=(8, 6))
         v_t = [d['v_occ_t'], d['v_dis_t'], d['v_ina_t']]
-        ax_t.bar(['Occupati', 'Disoccupati', 'Inattivi'], v_t, color=colors_std)
+        ax_t.bar(['Occupati', 'Disoccupati', 'Inattivi'], v_t, color=[c_occ, c_dis, c_ina])
         ax_t.axhline(0, color='black', linewidth=1.5)
         ax_t.set_title("VARIAZIONE ANNUALE (k)", fontweight='bold')
         for i, v in enumerate(v_t):
@@ -138,8 +138,8 @@ with tab2:
         st.pyplot(fig_t)
     with c4:
         fig_p2, ax_p2 = plt.subplots(figsize=(8, 6))
+        sizes_t = [abs(d['inc_occ_t']), abs(d['inc_ina_t'])]
         labels_t = [f"Inc. Occ\n{d['inc_occ_t']}%", f"Inc. Ina\n{d['inc_ina_t']}%"]
-        ax_p2.pie([abs(d['inc_occ_t']), abs(d['inc_ina_t'])], labels=labels_t, 
-                  colors=['#3498db', '#95a5a6'], startangle=90, autopct='%1.1f%%', textprops={'fontweight':'bold'})
-        ax_p2.set_title(f"INCIDENZA SU VAR. DISOCCUPATI ({d['v_dis_t']}k)", fontweight='bold')
+        ax_p2.pie(sizes_t, labels=labels_t, colors=[c_occ, c_ina], startangle=90, autopct='%1.1f%%', textprops={'fontweight':'bold'})
+        ax_p2.set_title(f"PESO RELATIVO SU VAR. DISOCCUPATI ({d['v_dis_t']}k)", fontweight='bold')
         st.pyplot(fig_p2)
