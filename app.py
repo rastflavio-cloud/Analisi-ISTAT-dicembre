@@ -21,7 +21,7 @@ database_istat = {
     }
 }
 
-st.set_page_config(page_title="Analisi Istat 2025-2026", layout="wide")
+st.set_page_config(page_title="Analisi Istat", layout="wide")
 st.title("📊 Analisi Mercato del Lavoro")
 
 # --- 2. DOPPIA SELEZIONE (ANNO E POI MESE) ---
@@ -31,9 +31,7 @@ with col_sel1:
     anno = st.selectbox("Seleziona l'anno:", list(database_istat.keys()))
 
 with col_sel2:
-    # Questa tendina si aggiorna in base all'anno scelto sopra
-    lista_mesi = list(database_istat[anno].keys())
-    mese = st.selectbox("Seleziona il mese:", lista_mesi)
+    mese = st.selectbox("Seleziona il mese:", list(database_istat[anno].keys()))
 
 d = database_istat[anno][mese]
 
@@ -49,37 +47,69 @@ with st.expander(f"📝 ANALISI DETTAGLIATA - {mese} {anno}", expanded=True):
         return f"<span style='color:black; font-weight:bold;'>{sign}{val}{unit}</span>"
 
     st.markdown(f"""
+    **FORZA LAVORO TOTALE:** {d['occ'] + d['dis']} mila  
     **TASSO OCCUPAZIONE:** {d['t_occ']}% | **DISOCCUPAZIONE:** {d['t_dis']}% | **INATTIVITÀ:** {d['t_ina']}%
     
     --- 
-    ### --- ANALISI CONGIUNTURALE ---
+    ### --- ANALISI CONGIUNTURALE (ASSOLUTI) ---
     Variazioni: Occupati {color_val(d['v_occ_c'])} | Disoccupati {black_bold_val(d['v_dis_c'])} | Inattivi {color_val(d['v_ina_c'])}  
     * Incidenza Occupazione su Disoccupazione: **{d['inc_occ_c']}%**
     * Incidenza Inattività su Disoccupazione: **{d['inc_ina_c']}%**
 
     ---
-    ### --- ANALISI TENDENZIALE ---
+    ### --- ANALISI TENDENZIALE (ASSOLUTI) ---
     Variazioni: Occupati {color_val(d['v_occ_t'])} | Disoccupati {black_bold_val(d['v_dis_t'])} | Inattivi {color_val(d['v_ina_t'])}  
     * Incidenza Occupazione su Disoccupazione: **{d['inc_occ_t']}%**
     * Incidenza Inattività su Disoccupazione: **{d['inc_ina_t']}%**
     """, unsafe_allow_html=True)
 
 # --- 4. GRAFICI ---
+st.write(f"### 📈 Visualizzazione Grafica {mese} {anno}")
 c_occ, c_dis, c_ina = '#3498db', '#e74c3c', '#95a5a6'
 
-def plot_pie(occ_v, dis_v, ina_v, occ_i, ina_i, title):
-    fig, ax = plt.subplots()
+# Grafico Tassi
+fig1, ax1 = plt.subplots(figsize=(10, 4))
+ax1.bar(['Occ', 'Dis', 'Ina'], [d['t_occ'], d['t_dis'], d['t_ina']], color=[c_occ, c_dis, c_ina], width=0.5)
+ax1.set_title(f"TASSI ATTUALI ({mese} {anno})", fontweight='bold')
+for i, v in enumerate([d['t_occ'], d['t_dis'], d['t_ina']]):
+    ax1.text(i, v + 1, f"{v}%", ha='center', fontweight='bold')
+st.pyplot(fig1)
+
+# Funzione per generare il grafico a torta
+def plot_pie(occ_v, dis_v, ina_v, occ_i, ina_i):
+    fig, ax = plt.subplots(figsize=(8, 6))
     vals = [abs(occ_v), abs(dis_v), abs(ina_v)]
     labs = [f"Occ ({occ_v}k)\nInc: {occ_i}%", f"Dis ({dis_v}k)", f"Ina ({ina_v}k)\nInc: {ina_i}%"]
     ax.pie(vals, labels=labs, colors=[c_occ, c_dis, c_ina], autopct='%1.1f%%', startangle=90, textprops={'fontweight':'bold'})
-    ax.set_title(title, fontweight='bold')
+    ax.set_title("ripartizione delle variazioni occupati e inattivi", fontweight='bold')
     return fig
 
-st.write(f"### 📈 Visualizzazione Grafica {mese} {anno}")
 tab1, tab2 = st.tabs(["🔴 ANALISI MENSILE", "🟡 ANALISI ANNUALE"])
 
 with tab1:
-    st.pyplot(plot_pie(d['v_occ_c'], d['v_dis_c'], d['v_ina_c'], d['inc_occ_c'], d['inc_ina_c'], "ripartizione delle variazioni occupati e inattivi"))
+    c1, c2 = st.columns(2)
+    with c1:
+        fig_c, ax_c = plt.subplots(figsize=(8, 6))
+        v_c = [d['v_occ_c'], d['v_dis_c'], d['v_ina_c']]
+        ax_c.bar(['Occupati', 'Disoccupati', 'Inattivi'], v_c, color=[c_occ, c_dis, c_ina])
+        ax_c.axhline(0, color='black', linewidth=1.5)
+        ax_c.set_title("VARIAZIONE MENSILE (k)", fontweight='bold')
+        for i, v in enumerate(v_c):
+            ax_c.text(i, v + (1 if v > 0 else -3), f"{v}k", ha='center', fontweight='bold')
+        st.pyplot(fig_c)
+    with c2:
+        st.pyplot(plot_pie(d['v_occ_c'], d['v_dis_c'], d['v_ina_c'], d['inc_occ_c'], d['inc_ina_c']))
 
 with tab2:
-    st.pyplot(plot_pie(d['v_occ_t'], d['v_dis_t'], d['v_ina_t'], d['inc_occ_t'], d['inc_ina_t'], "ripartizione delle variazioni occupati e inattivi"))
+    c3, c4 = st.columns(2)
+    with c3:
+        fig_t, ax_t = plt.subplots(figsize=(8, 6))
+        v_t = [d['v_occ_t'], d['v_dis_t'], d['v_ina_t']]
+        ax_t.bar(['Occupati', 'Disoccupati', 'Inattivi'], v_t, color=[c_occ, c_dis, c_ina])
+        ax_t.axhline(0, color='black', linewidth=1.5)
+        ax_t.set_title("VARIAZIONE ANNUALE (k)", fontweight='bold')
+        for i, v in enumerate(v_t):
+            ax_t.text(i, v + (5 if v > 0 else -20), f"{v:+}k", ha='center', fontweight='bold')
+        st.pyplot(fig_t)
+    with c4:
+        st.pyplot(plot_pie(d['v_occ_t'], d['v_dis_t'], d['v_ina_t'], d['inc_occ_t'], d['inc_ina_t']))
