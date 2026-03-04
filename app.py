@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 
 # --- 1. DATABASE STRUTTURATO PER ANNO E MESE ---
 database_istat = {
+    "2026": {
+        "Gennaio": {"occ": 24181, "dis": 1305, "ina": 12594, "t_occ": 62.6, "t_dis": 5.1, "t_ina": 33.9, "v_occ_c": 80, "v_dis_c": -99, "v_ina_c": 35, "v_occ_t": 70, "v_dis_t": -384, "v_ina_t": 322, "inc_occ_c": -80.8, "inc_ina_c": -35.4, "inc_occ_t": -18.2, "inc_ina_t": -83.9}
+    },
     "2025": {
         "Dicembre": {"occ": 24142, "dis": 1426, "ina": 12518, "t_occ": 62.5, "t_dis": 5.6, "t_ina": 33.7, "v_occ_c": -20, "v_dis_c": -15, "v_ina_c": 31, "v_occ_t": 62, "v_dis_t": -229, "v_ina_t": 163, "inc_occ_c": 133.3, "inc_ina_c": 206.7, "inc_occ_t": -27.1, "inc_ina_t": 71.2},
         "Novembre": {"occ": 24188, "dis": 1469, "ina": 12440, "t_occ": 62.6, "t_dis": 5.7, "t_ina": 33.5, "v_occ_c": -34, "v_dis_c": -30, "v_ina_c": 72, "v_occ_t": 179, "v_dis_t": -106, "v_ina_t": -35, "inc_occ_c": 113.3, "inc_ina_c": 240.0, "inc_occ_t": -168.9, "inc_ina_t": -33.0},
@@ -14,17 +17,48 @@ database_istat = {
         "Marzo": {"occ": 24307, "dis": 1555, "ina": 12248, "t_occ": 63.0, "t_dis": 6.0, "t_ina": 32.9, "v_occ_c": -16, "v_dis_c": 32, "v_ina_c": -11, "v_occ_t": 450, "v_dis_t": -208, "v_ina_t": -107, "inc_occ_c": -50.0, "inc_ina_c": -34.4, "inc_occ_t": -216.3, "inc_ina_t": -51.4},
         "Febbraio": {"occ": 24332, "dis": 1517, "ina": 12254, "t_occ": 63.0, "t_dis": 5.9, "t_ina": 32.9, "v_occ_c": 47, "v_dis_c": -79, "v_ina_c": 33, "v_occ_t": 567, "v_dis_t": -342, "v_ina_t": -60, "inc_occ_c": -59.5, "inc_ina_c": 41.8, "inc_occ_t": -165.8, "inc_ina_t": -17.5},
         "Gennaio": {"occ": 24222, "dis": 1621, "ina": 12242, "t_occ": 62.8, "t_dis": 6.3, "t_ina": 32.9, "v_occ_c": 145, "v_dis_c": -9, "v_ina_c": -146, "v_occ_t": 513, "v_dis_t": -194, "v_ina_t": -158, "inc_occ_c": -1611.1, "inc_ina_c": -1622.2, "inc_occ_t": -264.4, "inc_ina_t": -81.4},
-    },
-    "2026": {
-        "Febbraio": {"occ": 24400, "dis": 1500, "ina": 12300, "t_occ": 63.1, "t_dis": 5.8, "t_ina": 33.0, "v_occ_c": 68, "v_dis_c": -17, "v_ina_c": -51, "v_occ_t": 68, "v_dis_t": -17, "v_ina_t": -51, "inc_occ_c": 400.0, "inc_ina_c": 300.0, "inc_occ_t": 400.0, "inc_ina_t": 300.0},
-        "Gennaio": {"occ": 24350, "dis": 1510, "ina": 12350, "t_occ": 62.9, "t_dis": 5.9, "t_ina": 33.1, "v_occ_c": 128, "v_dis_c": -11, "v_ina_c": -117, "v_occ_t": 128, "v_dis_t": -11, "v_ina_t": -117, "inc_occ_c": 1163.6, "inc_ina_c": 1063.6, "inc_occ_t": 1163.6, "inc_ina_t": 1063.6},
     }
 }
 
+# --- 2. CONFIGURAZIONE PAGINA ---
 st.set_page_config(page_title="Analisi Istat", layout="wide")
+
+# --- NUOVO: CALCOLATORE ADMIN NELLA BARRA LATERALE ---
+with st.sidebar.expander("🛠️ Calcolatore Nuovi Dati", expanded=False):
+    st.write("Inserisci i dati assoluti dal PDF ISTAT")
+    
+    c1, c2, c3 = st.columns(3)
+    occ = c1.number_input("Occupati", value=24000, step=10)
+    dis = c2.number_input("Disoccupati", value=1500, step=10)
+    ina = c3.number_input("Inattivi", value=12000, step=10)
+    
+    c4, c5, c6 = st.columns(3)
+    t_occ = c4.number_input("T. Occ %", value=60.0, step=0.1)
+    t_dis = c5.number_input("T. Dis %", value=5.0, step=0.1)
+    t_ina = c6.number_input("T. Ina %", value=30.0, step=0.1)
+    
+    st.write("Variazioni Mensili (Congiunturali)")
+    vc_occ = st.number_input("Var. Mensile Occ", value=0, step=1)
+    vc_dis = st.number_input("Var. Mensile Dis", value=0, step=1)
+    vc_ina = st.number_input("Var. Mensile Ina", value=0, step=1)
+
+    st.write("Variazioni Annuali (Tendenziali)")
+    vt_occ = st.number_input("Var. Annuale Occ", value=0, step=1)
+    vt_dis = st.number_input("Var. Annuale Dis", value=0, step=1)
+    vt_ina = st.number_input("Var. Annuale Ina", value=0, step=1)
+    
+    if st.button("Genera Codice"):
+        inc_occ_c = round((vc_occ / vc_dis * 100), 1) if vc_dis != 0 else 0
+        inc_ina_c = round((vc_ina / vc_dis * 100), 1) if vc_dis != 0 else 0
+        inc_occ_t = round((vt_occ / vt_dis * 100), 1) if vt_dis != 0 else 0
+        inc_ina_t = round((vt_ina / vt_dis * 100), 1) if vt_dis != 0 else 0
+        
+        risultato = f'"NomeMese": {{"occ": {occ}, "dis": {dis}, "ina": {ina}, "t_occ": {t_occ}, "t_dis": {t_dis}, "t_ina": {t_ina}, "v_occ_c": {vc_occ}, "v_dis_c": {vc_dis}, "v_ina_c": {vc_ina}, "v_occ_t": {vt_occ}, "v_dis_t": {vt_dis}, "v_ina_t": {vt_ina}, "inc_occ_c": {inc_occ_c}, "inc_ina_c": {inc_ina_c}, "inc_occ_t": {inc_occ_t}, "inc_ina_t": {inc_ina_t}}},'
+        st.code(risultato, language="python")
+
 st.title("📊 Analisi Mercato del Lavoro")
 
-# --- 2. DOPPIA SELEZIONE (ANNO E POI MESE) ---
+# --- 3. DOPPIA SELEZIONE (ANNO E POI MESE) ---
 col_sel1, col_sel2 = st.columns(2)
 
 with col_sel1:
@@ -35,7 +69,7 @@ with col_sel2:
 
 d = database_istat[anno][mese]
 
-# --- 3. ANALISI TESTUALE ---
+# --- 4. ANALISI TESTUALE ---
 with st.expander(f"📝 ANALISI DETTAGLIATA - {mese} {anno}", expanded=True):
     def color_val(val, unit=" mila"):
         color = "red" if val < 0 else "#00ff00" 
@@ -63,7 +97,7 @@ with st.expander(f"📝 ANALISI DETTAGLIATA - {mese} {anno}", expanded=True):
     * Incidenza Inattività su Disoccupazione: **{d['inc_ina_t']}%**
     """, unsafe_allow_html=True)
 
-# --- 4. GRAFICI ---
+# --- 5. GRAFICI ---
 st.write(f"### 📈 Visualizzazione Grafica {mese} {anno}")
 c_occ, c_dis, c_ina = '#3498db', '#e74c3c', '#95a5a6'
 
